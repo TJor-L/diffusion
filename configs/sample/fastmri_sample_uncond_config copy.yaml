@@ -1,0 +1,65 @@
+setting:
+  # save_dir: /YOUR_PATH_TO_SAVE         
+  save_dir: /home/research/l.tingjun/diffusion_mentoring/guided_diffusion/output    # example
+  save_code: False
+  code_dir: /home/research/l.tingjun/diffusion_mentoring/guided_diffusion  # src_path: code folder directory 
+  experiment_type: test # [tra, val, test]
+  save_interval: 40000
+  resume_checkpoint: '/home/research/l.tingjun/diffusion_mentoring/pretrained_model/pretrained_model/ema_0.9999_960000.pt'
+  method: diffusion
+
+langevin:
+  num_iters: 1000
+
+vp_diffusion:
+  noise_schedule: linear
+  diffusion_model_type: unconditional # [unconditional, measurement_conditional, mask_conditional]
+  image_size: 320
+  microbatch: -1
+  learn_sigma: True
+  in_channels: 2
+  cond_channels: 0
+  num_channels: 128
+  # num_res_blocks: 1
+  num_res_blocks: 2
+  channel_mult: ""
+  class_cond: False
+  use_checkpoint: False
+  attention_resolutions: 32,16,8
+  num_heads: 4
+  num_head_channels: 64
+  num_heads_upsample: -1
+  use_scale_shift_norm: True
+  dropout: 0.0
+  resblock_updown: True
+  use_fp16: False
+  # use_fp16: True
+  use_new_attention_order: False
+  #####
+  # Below is for the test configuration
+  #####
+  model_path: '/home/research/l.tingjun/diffusion_mentoring/pretrained_model/pretrained_model/ema_0.9999_960000.pt'
+  use_ddim: false
+  timestep_respacing: ''
+  clip_denoised: True
+
+dataset:
+  dataset_name: fastmri
+  mask_pattern: "randomly_cartesian"  #['randomly_cartesian', 'uniformly_cartesian']
+  num_multi_slice: 3
+  acceleration_rate: 4
+  noise_snr: 40
+
+train:
+  batch_size: 1
+  num_workers: 1
+  compute_vb_loss: False
+
+test:
+  diffusion:
+    use_ddim: false
+    timestep_respacing: ''
+
+  ckpt_path: "ema_0.9999_960000.pt"
+  desc: testing300slices
+

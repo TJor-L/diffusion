@@ -1,0 +1,88 @@
+setting:
+  # save_dir: /project/cigserver5/export1/p.youngil/experiment/Stochastic_RW/train_uncond_acc0        # train_maskcond_acc0
+  save_dir: /home/research/l.tingjun/diffusion_mentoring/guided_diffusion/output
+  # save_dir: /project/cigserver5/export1/p.youngil/experiment/Stochastic_RW/practice        # example
+  save_code: False
+  code_dir: /home/research/l.tingjun/diffusion_mentoring/guided_diffusion   # src_path: code folder directory 
+  # save_dir: /home/research/chicago/Stochastic_RW/experiment/20241119_diffusion_3dMRI_training_acc40_RERUN         # saving folder name
+  # exp_folder: 20241119_diffusion_3dMRI_training_acc40_RERUN 
+  experiment_type: train # [tra, val, tst]
+  save_interval: 50000
+  # resume_checkpoint: /project/cigserver5/export1/p.youngil/experiment/Stochastic_RW/20241119_fastmri_uncond_training/11262024_1508_exp_fastmri_4/model680000.pt
+  resume_checkpoint: ''
+  method: diffusion
+
+langevin:
+  num_iters: 1000
+
+vp_diffusion:
+  noise_schedule: linear
+  diffusion_model_type: unconditional # [unconditional, measurement_conditional, mask_conditional]
+  image_size: 256
+  microbatch: -1
+  learn_sigma: True
+  in_channels: 2
+  cond_channels: 0
+  num_channels: 128
+  # num_res_blocks: 1
+  num_res_blocks: 2
+  channel_mult: ""
+  class_cond: False
+  use_checkpoint: False
+  attention_resolutions: 32,16,8
+  num_heads: 4
+  num_head_channels: 64
+  num_heads_upsample: -1
+  use_scale_shift_norm: True
+  dropout: 0.0
+  resblock_updown: True
+  use_fp16: False
+  # use_fp16: True
+  use_new_attention_order: False
+  #####
+  # Below is for the test configuration
+  #####
+  model_path: '/project/cigserver5/export1/p.youngil/experiment/Stochastic_RW/20241119_fastmri_training/11232024_1759_exp_fastmri_4/ema_0.9999_350000.pt'
+  # model_path: '/project/cigserver5/export1/p.youngil/experiment/Stochastic_RW/20241119_fastmri_training/11232024_1759_exp_fastmri_4/model350000.pt'
+  use_ddim: false
+  timestep_respacing: ''
+  clip_denoised: True
+
+dataset:
+  dataset_name: fastmri
+  mask_pattern: "randomly_cartesian"  #['randomly_cartesian', 'uniformly_cartesian']
+  num_multi_slice: 3
+  acceleration_rate: 4
+  noise_snr: 40
+
+train:
+  batch_size: 1
+  num_workers: 1
+  compute_vb_loss: False
+
+test:
+  diffusion:
+    use_ddim: false
+    timestep_respacing: ''
+
+  ckpt_path: "ema_0.9999_350000.pt"
+  desc: testing300slices
+
+# model:
+#   noise_perturbation_type: vp
+#   image_size: 256
+#   num_channels: 256
+#   num_res_blocks: 2
+#   channel_mult: ""
+#   learn_sigma: True
+#   class_cond: False
+#   use_checkpoint: False
+#   attention_resolutions: 32,16,8
+#   num_heads: 4
+#   num_head_channels: 64
+#   num_heads_upsample: -1
+#   use_scale_shift_norm: True
+#   dropout: 0.0
+#   resblock_updown: True
+#   use_fp16: False
+#   use_new_attention_order: False

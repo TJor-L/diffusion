@@ -1,0 +1,1 @@
+bsub -q gpu-compute-long -n 4 -gpu "num=1:mode=exclusive_process" -o ~/log/20240308_diffusion_3dMRI_4XH_acc40_RERUN /project/cigserver5/export/gan.weijie/miniconda3/envs/2023_inverse_diffusion/bin/python main.py
