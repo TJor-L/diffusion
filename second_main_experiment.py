@@ -38,6 +38,8 @@ from guided_diffusion.guided_diffusion.measurements import get_noise, get_operat
 
 from functools import partial
 
+from skimage.metrics import peak_signal_noise_ratio, structural_similarity
+
 class DatasetWrapper(Dataset):
     def __init__(self, parent_dataset, diffusion_model_type):
         self.dataset = parent_dataset
@@ -467,6 +469,11 @@ def test(
         print("low_res 条件输入的 shape:", model_kwargs['low_res'].shape)
         print("ground truth shape:", x_gt.shape)
         
+        x_pred_for_plot = 0
+        x_cond_for_plot = 0
+
+
+
         # 保存 ground truth（确保 tensor 在 CPU 上且转换为 numpy 数组）
         ground_truth.append(x_gt.detach().cpu().numpy())
 
@@ -497,9 +504,11 @@ def test(
                 model_kwargs={'low_res': model_kwargs['low_res'].to(device)},
                 progress=True,
             )
+            x_pred_for_plot = sample.clone()
             sample = sample.detach().cpu().numpy()
             result.append(sample)
             low_res.append(model_kwargs['low_res'].detach().cpu().numpy())
+            x_cond_for_plot = model_kwargs['low_res'].clone()
 
         elif diffusion_model_type in ["mask_conditional"]:
             sample = sample_fn(
@@ -553,13 +562,73 @@ def test(
         else:
             raise ValueError("Check the diffusion_model_type")
 
+        x_start_for_plot = x_gt.clone()
+        print(x_start_for_plot)
+
+        x_start_for_plot = abs_helper(x_start_for_plot).squeeze().detach().cpu().numpy()
+        x_pred_for_plot = abs_helper(x_pred_for_plot).squeeze().detach().cpu().numpy()
+        x_cond_for_plot = abs_helper(x_cond_for_plot).squeeze().detach().cpu().numpy()
+
+        # 计算PSNR和SSIM（data_range=1 表示图像数据在 [0, 1] 内）
+        psnr_val = peak_signal_noise_ratio(x_start_for_plot, x_pred_for_plot, data_range=1)
+        ssim_val = structural_similarity(x_start_for_plot, x_pred_for_plot, data_range=1)
+
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+        axes[0].imshow(x_start_for_plot, cmap='gray')
+        axes[0].set_title('Ground Truth')
+        axes[0].axis('off')
+
+        axes[1].imshow(x_pred_for_plot, cmap='gray')
+        axes[1].set_title(f'Prediction\nPSNR: {psnr_val:.2f} dB\nSSIM: {ssim_val:.4f}')
+        axes[1].axis('off')
+
+        axes[2].imshow(x_cond_for_plot, cmap='gray')
+        axes[2].set_title('Condition')
+        axes[2].axis('off')
+
+        plt.savefig(os.path.join("/project/cigserver4/export1/l.tingjun/output/sample_test", f"test{i}.png"))
+        plt.close(fig)
+
     result = np.concatenate(result, 0)
+    if diffusion_model_type in ["measurement_conditional", "mask_conditional"]:
+        low_res = np.concatenate(low_res, 0)
+        ground_truth = np.concatenate(ground_truth, 0)
+    result_tensor = torch.from_numpy(result)
+    result_processed = abs_helper(result_tensor).squeeze().cpu().numpy()
+
+    if diffusion_model_type in ["measurement_conditional", "mask_conditional"]:
+        low_res_tensor = torch.from_numpy(low_res)
+        low_res_processed = abs_helper(low_res_tensor).squeeze().cpu().numpy()
+        
+        ground_truth_tensor = torch.from_numpy(ground_truth)
+        ground_truth_processed = abs_helper(ground_truth_tensor).squeeze().cpu().numpy()
+        
+        tifffile.imwrite(os.path.join(save_dir, 'sampled_img.tiff'), result_processed)
+        tifffile.imwrite(os.path.join(save_dir, 'low_res.tiff'), low_res_processed)
+        tifffile.imwrite(os.path.join(save_dir, 'real_ground_truth.tiff'), ground_truth_processed)
+    else:
+        tifffile.imwrite(os.path.join(save_dir, 'sampled_img.tiff'), result_processed)
 
     if diffusion_model_type in ["measurement_conditional", "mask_conditional"]:
         low_res = np.concatenate(low_res, 0)
         ground_truth = np.concatenate(ground_truth, 0)
 
-    tifffile.imwrite(os.path.join(save_dir, 'sampled_img.tiff'), result)
-    tifffile.imwrite(os.path.join(save_dir, 'low_res.tiff'), low_res)
-    tifffile.imwrite(os.path.join(save_dir, 'ground_truth.tiff'), ground_truth)
+    # final_x_gt = ground_truth[0]
+
+    #   final_x_gt_tensor = torch.tensor(final_x_gt).view(1, 2, 256, 256)
+
+    # print(final_x_gt_tensor.shape)
+
+    # fig, axes = plt.subplots(1, 1, figsize=(15, 5))
+    # final_x_gt_tensor = abs_helper(final_x_gt_tensor).squeeze().numpy()
+    # axes.imshow(final_x_gt_tensor, cmap='gray')
+    # axes.set_title('Ground Truth')
+    # axes.axis('off')
+    # plt.savefig(os.path.join("/project/cigserver4/export1/l.tingjun/output/sample_test", f"TTT.png"))
+    # plt.close(fig)
+
+    # tifffile.imwrite(os.path.join(save_dir, 'sampled_img.tiff'), result)
+    # tifffile.imwrite(os.path.join(save_dir, 'low_res.tiff'), low_res)
+    # tifffile.imwrite(os.path.join(save_dir, 'real_ground_truth.tiff'), ground_truth)
 

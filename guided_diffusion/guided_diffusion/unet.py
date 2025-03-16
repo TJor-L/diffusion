@@ -720,7 +720,7 @@ class SuperResModel(UNetModel):
     def forward(self, x, timesteps, low_res=None, smps = None, **kwargs):
         # print(f"mask: {mask}")
         # print(f"smps: {smps}")
-        # print(f"kwargs: {kwargs}")
+        # print(f"kwargs in SuperResModel: {kwargs}")
         # print(low_res)
         # raise ValueError(f"x.shape: {x.shape}\nkwargs: {kwargs}\nmask: {mask}\smps: {smps}\nlow_res: {low_res}")
 

@@ -130,6 +130,7 @@ class GaussianDiffusion:
         loss_type,
         rescale_timesteps=False,
     ):
+        self.showed_image = 0
         self.model_mean_type = model_mean_type
         self.model_var_type = model_var_type
         self.loss_type = loss_type
@@ -1110,11 +1111,9 @@ class GaussianDiffusion:
             model_kwargs = {}
         if noise is None:
             noise = th.randn_like(x_start)
-            
         x_t = self.q_sample(x_start, t, noise=noise)
-        
-        terms = {}
 
+        terms = {}
         if self.loss_type == LossType.KL or self.loss_type == LossType.RESCALED_KL:
             terms["loss"] = self._vb_terms_bpd(
                 model=model,
@@ -1127,8 +1126,9 @@ class GaussianDiffusion:
             if self.loss_type == LossType.RESCALED_KL:
                 terms["loss"] *= self.num_timesteps
         elif self.loss_type == LossType.MSE or self.loss_type == LossType.RESCALED_MSE:
+            # print("model_kwargs:", model_kwargs)
             model_output = model(x_t, self._scale_timesteps(t), **model_kwargs)
-            
+          
             if self.model_var_type in [
                 ModelVarType.LEARNED,
                 ModelVarType.LEARNED_RANGE,
@@ -1144,6 +1144,7 @@ class GaussianDiffusion:
                 
                 x_start_for_plot = x_start.clone()
                 x_t_for_plot = x_t.clone()
+                x_low_res_for_plot = model_kwargs['low_res'].clone()
                     
                 # pred_xstart_for_plot = self._predict_xstart_from_eps(x_t_for_plot, t, model_output)
                 pred_xstart_for_plot = pred_xstart.clone()
@@ -1152,8 +1153,8 @@ class GaussianDiffusion:
                 # Plot the figure of x_t, x_start, pred_xstart
                 # --------
                 # if t % 10 == 0:
-                if ((t < 100) and (t % 2 == 0) and (t != 0)) or ((t >= 100) and (t % 300 == 0)):
-                    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+                if ((t < 100) and (t % 2 == 0) and (t != 0)) or ((t >= 100) and (t % 5 == 0)):
+                    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
                     x_start_for_plot = abs_helper(x_start_for_plot).squeeze().detach().cpu().numpy()
                     axes[0].imshow(x_start_for_plot, cmap='gray')
                     axes[0].set_title('Ground Truth')
@@ -1161,14 +1162,21 @@ class GaussianDiffusion:
                     
                     x_t_for_plot = abs_helper(x_t_for_plot).squeeze().detach().cpu().numpy()
                     axes[1].imshow(x_t_for_plot, cmap='gray')
-                    axes[1].set_title(f'Noisy ({t})')
+                    axes[1].set_title(f'Noisy ({t.item()})')
                     axes[1].axis('off')
                     
                     pred_xstart_for_plot = abs_helper(pred_xstart_for_plot).squeeze().detach().cpu().numpy()
                     axes[2].imshow(pred_xstart_for_plot, cmap='gray')
                     axes[2].set_title('Prediction x start')
                     axes[2].axis('off')
-                    plt.savefig(os.path.join(".", f"imgspace_fig_training_{acceleration_rate}.png"))
+
+                    x_low_res_for_plot = abs_helper(x_low_res_for_plot).squeeze().detach().cpu().numpy()
+                    axes[3].imshow(x_low_res_for_plot, cmap='gray')
+                    axes[3].set_title('Condition x_low_res')
+                    axes[3].axis('off')
+
+                    plt.savefig(os.path.join("/project/cigserver4/export1/l.tingjun/training_img/cond1", f"imgspace_fig_training_{acceleration_rate}_{t.item()}_{self.showed_image}.png"))
+                    self.showed_image+=1
                     plt.close(fig)
                 
                 

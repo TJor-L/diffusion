@@ -7,6 +7,7 @@ setting:
   experiment_type: train # [train_in_kspace, test]
   # resume_checkpoint: /project/cigserver5/export1/p.youngil/experiment/Stochastic_RW/20241119_fastmri_maskcond_training/11272024_0238_exp_fastmri_4/ema_0.9999_350000.pt
   # resume_checkpoint: /project/cigserver4/export1/l.tingjun/output/train_cond/02212025_1140_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1550000.pt
+  # resume_checkpoint: '/project/cigserver4/export1/l.tingjun/output/train_cond/02212025_1140_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1550000.pt'
   resume_checkpoint: ''
   save_interval: 50000
   method: diffusion
@@ -19,7 +20,7 @@ vp_diffusion:
   diffusion_model_type: measurement_conditional # [unconditional, measurement_conditional]
   image_size: 256
   microbatch: -1
-  learn_sigma: False
+  learn_sigma: True
   in_channels: 2
   cond_channels: 2
   num_channels: 128
@@ -63,7 +64,7 @@ test:
     use_ddim: false
     timestep_respacing: ''
 
-  ckpt_path: "ema_0.9999_350000.pt"
+  ckpt_path: "shitt"
   desc: testing300slices
 
 # model:

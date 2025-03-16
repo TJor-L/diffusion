@@ -180,6 +180,7 @@ class TrainLoop:
             time_init = time.time()
 
             batch, x_gt, cond = next(self.data)
+            # print(batch, x_gt, cond)
             # raise ValueError(f"batch.device = {batch.device}")
             # batch = batch.to(f"cuda:{self.gpu}")
             # raise ValueError(f"batch.device = {batch.device}")

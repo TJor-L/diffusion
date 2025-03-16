@@ -5,7 +5,7 @@ setting:
   code_dir: /home/research/l.tingjun/diffusion_mentoring/guided_diffusion  # src_path: code folder directory 
   experiment_type: test # [tra, val, test]
   save_interval: 40000
-  resume_checkpoint: '/project/cigserver4/export1/l.tingjun/output/train_cond/02212025_1140_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1000000.pt'
+  resume_checkpoint: '/project/cigserver4/export1/l.tingjun/output/train_cond/03052025_1904_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1000000.pt'
   method: diffusion
 
 langevin:
@@ -16,7 +16,7 @@ vp_diffusion:
   diffusion_model_type: measurement_conditional # [unconditional, measurement_conditional, mask_conditional]
   image_size: 256
   microbatch: -1
-  learn_sigma: False
+  learn_sigma: True
   in_channels: 2
   cond_channels: 2
   num_channels: 128
@@ -38,7 +38,7 @@ vp_diffusion:
   #####
   # Below is for the test configuration
   #####
-  model_path: '/project/cigserver4/export1/l.tingjun/output/train_cond/02212025_1140_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1000000.pt'
+  model_path: '/project/cigserver4/export1/l.tingjun/output/train_cond/03052025_1904_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1000000.pt'
   use_ddim: false
   timestep_respacing: ''
   clip_denoised: True
@@ -60,6 +60,6 @@ test:
     use_ddim: false
     timestep_respacing: ''
 
-  ckpt_path: "ema_0.9999_1000000.pt"
+  ckpt_path: "/project/cigserver4/export1/l.tingjun/output/train_cond/03052025_1904_fastmri_vbF_unimask_acc4_img256/ema_0.9999_1000000.pt"
   desc: testing300slices
 
